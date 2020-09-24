@@ -178,6 +178,29 @@ namespace octomap_msgs{
   }
   
   /**
+   * @brief Serialization of an octree into binary data e.g. for messages and services while suppressing the true tree type.
+   * This can be used for creating a 2D occupancy map from a ColorOcTree.
+   * Compact binary version (stores only max-likelihood free or occupied, .bt file format).
+   * The data will be much smaller if you call octomap.toMaxLikelihood() and octomap.prune()
+   * before.
+   * @return success of serialization
+   */
+  template <class OctomapT>
+  static inline bool binaryMapToMsgBrut(const OctomapT& octomap, Octomap& msg){
+    msg.resolution = octomap.getResolution();
+    msg.id = "other";
+    msg.binary = true;
+    
+    std::stringstream datastream;
+    if (!octomap.writeBinaryData(datastream))
+      return false;
+    
+    std::string datastring = datastream.str();
+    msg.data = std::vector<int8_t>(datastring.begin(), datastring.end());
+    return true;
+  }
+  
+  /**
    * @brief Serialization of an octree into binary data e.g. for messages and services.
    * Full probability version (stores complete state of tree, .ot file format).
    * The data will be much smaller if you call octomap.toMaxLikelihood() and octomap.prune()
